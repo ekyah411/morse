@@ -74,10 +74,10 @@ class Odometry(SensorCreator):
 class Pose(SensorCreator):
     def __init__(self, name=None):
         SensorCreator.__init__(self, name, "morse.sensors.pose.Pose", "pose")
-        mesh = Cube("PoseCube")
-        mesh.scale = (.04, .04, .02)
-        mesh.color(.8, .3, .1)
-        self.append(mesh)
+        #mesh = Cube("PoseCube")
+        #mesh.scale = (.04, .04, .02)
+        #mesh.color(.8, .3, .1)
+        #self.append(mesh)
 
 class Proximity(SensorCreator):
     def __init__(self, name=None):
