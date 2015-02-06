@@ -1,8 +1,10 @@
 import bpy, math
 from mathutils import Vector, Matrix, Euler
 import copy
-from io_scene_urdf.urdf_components.joint import URDFJoint
-from io_scene_urdf.urdf_components.link import URDFLink
+
+from morse.builder.urdf_components.joint import URDFJoint
+from morse.builder.urdf_components.link import URDFLink
+
 class URDFArmature:
 
     def __init__(self, urdf):
@@ -69,8 +71,7 @@ class URDFArmature:
         ### Start with the base link, if there is multiple roots, do nothing
         try: 
             print('Establishing joints/links dependency...')
-            self.root_link = self.urdf.link_map[self.urdf.get_root()]
-            
+            self.root_link = self.urdf.link_map[self.urdf.get_root()]            
         except:
             print('Multiple roots detected, robot will not be built, exiting...')
             return 
@@ -87,22 +88,28 @@ class URDFArmature:
         armature.show_axes = True
 
         bpy.ops.object.mode_set(mode='EDIT')
-
+        # Place frames and meshes at their origin
         temp_list = []
         temp_list.append(self.root_link) 
         while len(temp_list)>0:
             parent_link = temp_list[0]
-            for (joint_name, child_link_name) in self.urdf.child_map[parent_link.name]:
-                
-                child_link = self.urdf.link_map[child_link_name]
-                if child_link_name in self.urdf.child_map:
-                    temp_list.append(child_link)
-                
-                # Call function to do parenting
-                urdf_joint = URDFJoint(self.urdf.joint_map[joint_name], self.urdf)
-                self.joints.append(urdf_joint)
-                urdf_joint.build(ob, parent_link,child_link)
-            temp_list.pop(0)
+
+            # If there is only 1 link 
+            if parent_link.name in self.urdf.child_map:
+                for (joint_name, child_link_name) in self.urdf.child_map[parent_link.name]:
+                    
+                    child_link = self.urdf.link_map[child_link_name]
+                    if child_link_name in self.urdf.child_map:
+                        temp_list.append(child_link)
+                    
+                    # Call function to do parenting
+                    urdf_joint = URDFJoint(self.urdf.joint_map[joint_name], self.urdf)
+                    self.joints.append(urdf_joint)
+                    urdf_joint.build(ob, parent_link,child_link)
+                temp_list.pop(0)
+            else:
+                temp_list.pop(0)
+
 
         # Create a bone
 

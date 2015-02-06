@@ -13,3 +13,8 @@ INSTALL(DIRECTORY urdf_components
         DESTINATION ${PYTHON_INSTDIR}/morse/builder
         REGEX .*py.$ EXCLUDE
         )
+
+INSTALL(DIRECTORY urdf_parser
+        DESTINATION ${PYTHON_INSTDIR}/morse/builder
+        REGEX .*py.$ EXCLUDE
+        )
