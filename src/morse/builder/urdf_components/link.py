@@ -76,16 +76,26 @@ class URDFLink:
 			bpy.ops.mesh.primitive_cube_add()
 			self.mesh_visual = bpy.context.selected_objects[0]
 			self.mesh_visual.dimensions = geometry.size
-
+		
 		elif isinstance(geometry, Mesh):
-			bpy.ops.object.add(type="MESH")
-			self.mesh_collision = bpy.context.selected_objects[0]
-
+			#bpy.ops.object.add(type="MESH")
+			print('Meshes currently not yet supported. Adding default')
+			bpy.ops.object.add(type = "EMPTY")
+			self.mesh_visual = bpy.context.selected_objects[0]
+		
+		else:
+			print('Current visual geometry not supported. Adding default')
+			bpy.ops.object.add(type = "EMPTY")
+			self.mesh_visual = bpy.context.selected_objects[0]
+			
+		
 		self.mesh_visual.name = self.frame.name + '_visual' 
 		self.mesh_visual.parent = self.frame
 		if self.urdf_link.visual.origin:
 			self.mesh_visual.location = self.urdf_link.visual.origin.xyz
 			self.mesh_visual.rotation_quaternion = Euler(self.urdf_link.visual.origin.rpy, 'XYZ').to_quaternion()
+	
+	
 	def build_collision(self):
 		# TODO: Load mesh from file
 		geometry = self.urdf_link.collision.geometry
@@ -96,11 +106,18 @@ class URDFLink:
 			bpy.ops.mesh.primitive_cube_add()
 			self.mesh_collision = bpy.context.selected_objects[0]
 			self.mesh_collision.dimensions = geometry.size
-
+		
 		elif isinstance(geometry, Mesh):
-			bpy.ops.object.add(type="MESH")
+			#bpy.ops.object.add(type="MESH")
+			print('Meshes currently not yet supported. Adding default')
+			bpy.ops.object.add(type = "EMPTY")
 			self.mesh_collision = bpy.context.selected_objects[0]
-
+		
+		else:
+			print('Current collision geometry not supported. Adding default')
+			bpy.ops.object.add(type = "EMPTY")
+			self.mesh_collision = bpy.context.selected_objects[0]
+		
 		self.mesh_collision.name = self.frame.name + '_collision' 
 		self.mesh_collision.parent = self.frame
 		if self.urdf_link.collision.origin:

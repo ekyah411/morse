@@ -9,7 +9,6 @@ class URDFArmature:
 
     def __init__(self, urdf):
 
-
         self.name = urdf.name
         self.urdf = urdf
         self.links = []
@@ -57,8 +56,6 @@ class URDFArmature:
         return  joint_list 
 
     def build(self):
-       
-
         # bpy.ops.object.mode_set(mode='EDIT')
         # for root in self.roots:
         #     root.build_editmode(ob)
@@ -75,19 +72,20 @@ class URDFArmature:
         except:
             print('Multiple roots detected, robot will not be built, exiting...')
             return 
-        # Create an armature at base link
-        bpy.ops.object.add(
-            type='ARMATURE', 
-            enter_editmode=True,
-            location=(0,0,0))
-        ob = bpy.context.object
-        ob.show_x_ray = True
-        ob.name = self.name
-        armature = ob.data
-        armature.name = self.name+'_armature'
-        armature.show_axes = True
-
-        bpy.ops.object.mode_set(mode='EDIT')
+        ## Create an armature at base link
+        #bpy.ops.object.add(
+            #type='ARMATURE', 
+            #enter_editmode=True,
+            #location=(0,0,0))
+        #ob = bpy.context.object
+        #ob.show_x_ray = True
+        #ob.name = self.name
+        #armature = ob.data
+        #armature.name = self.name+'_armature'
+        #armature.show_axes = True
+        #bpy.ops.object.mode_set(mode='EDIT')
+        ob = bpy.data.objects[self.root_link.name]
+        
         # Place frames and meshes at their origin
         temp_list = []
         temp_list.append(self.root_link) 
