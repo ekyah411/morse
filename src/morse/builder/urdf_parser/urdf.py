@@ -1,5 +1,4 @@
-from io_scene_urdf.urdf_parser.xml_reflection.basics import *
-#from morse.builder.urdf_parser.xml_reflection.core import *
+from morse.builder.urdf_parser.xml_reflection.basics import *
 from morse.builder.urdf_parser.xml_reflection.core import *
 
 # Add a 'namespace' for names so that things don't conflict between URDF and SDF?
