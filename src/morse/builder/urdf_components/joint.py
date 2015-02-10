@@ -1,9 +1,7 @@
 import bpy, math
 from mathutils import Vector, Matrix, Euler
 import copy
-
-from morse.builder.urdf_components.link import URDFLink
-
+from io_scene_urdf.urdf_components.link import URDFLink
 class URDFJoint:
 
     # cf urdf_parser_py.urdf.Joint.TYPES
