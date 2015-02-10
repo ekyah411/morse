@@ -105,6 +105,7 @@ class Mesh(Object):
 	def __init__(self, filename = None, scale = None):
 		self.filename = filename
 		self.scale = scale
+		print(filename)
 
 reflect(Mesh, params = [
 	Attribute('filename', str),
@@ -117,8 +118,8 @@ class GeometricType(ValueType):
 		self.factory = FactoryType('geometric', {
 			'box': Box,
 			'cylinder': Cylinder,
-			'sphere': Sphere,
-			'mesh': Mesh
+			'mesh': Mesh,
+			'sphere': Sphere
 			})
 	
 	def from_xml(self, node):

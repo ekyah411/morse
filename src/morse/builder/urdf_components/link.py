@@ -83,6 +83,7 @@ class URDFLink:
 	def build_collision(self):
 		# TODO: Load mesh from file
 		geometry = self.urdf_link.collision.geometry
+
 		# Add mesh
 		mesh = self._add_mesh(geometry)	
 		if mesh:
@@ -99,19 +100,18 @@ class URDFLink:
 
 	def _add_mesh(self, geometry):
 		# If it is a box
+		# try: 
+		# 	isinstance(geometry, Mesh)
+		# except Exception, e:
+		# 	print('Problem checking mesh type..........................')
+		print(geometry)
 		if isinstance(geometry, Box):
+
 			# Require size as Vector () geometry.size
 			bpy.ops.mesh.primitive_cube_add()
 			mesh = bpy.context.selected_objects[0]
 			mesh.dimensions = geometry.size
 			
-
-		# elif isinstance(geometry, Mesh): 
-		# 	# Requires file path geometry.filename
-		# 	filepath = geometry.filename
-		# 	bpy.ops.import_mesh.stl(filepath= filepath)
-		# 	mesh = bpy.context.selected_objects[0]
-
 		elif isinstance(geometry, Cylinder):
 			# Requires geometry.radius and geometry.length
 			bpy.ops.mesh.primitive_cylinder_add(radius = geometry.radius, depth = geometry.length)
@@ -121,6 +121,14 @@ class URDFLink:
 			# Require geometry.radius
 			bpy.ops.mesh.primitive_uv_sphere_add(size = geometry.radius)
 			mesh = bpy.context.selected_objects[0]
+
+		#elif isinstance(geometry, Mesh): 
+		#	print('Mesh type')
+		 	# Requires file path geometry.filename
+	 	#	filepath = geometry.filename
+		# 	bpy.ops.import_mesh.stl(filepath= filepath)
+		# 	mesh = bpy.context.selected_objects[0]
+
 		else: 
 			return None
 		return mesh
