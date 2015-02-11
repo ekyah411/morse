@@ -77,18 +77,18 @@ class URDFArmature:
             print('Multiple roots detected, robot will not be built, exiting...')
             return 
         # Create an armature at base link
-        bpy.ops.object.add(
-            type='ARMATURE', 
-            enter_editmode=True,
-            location=(0,0,0))
-        ob = bpy.context.object
-        ob.show_x_ray = True
-        ob.name = self.name
-        armature = ob.data
-        armature.name = self.name+'_armature'
-        armature.show_axes = True
+        # bpy.ops.object.add(
+        #     type='ARMATURE', 
+        #     enter_editmode=True,
+        #     location=(0,0,0))
+        # ob = bpy.context.object
+        # ob.show_x_ray = True
+        # ob.name = self.name
+        # armature = ob.data
+        # armature.name = self.name+'_armature'
+        # armature.show_axes = True
 
-        bpy.ops.object.mode_set(mode='EDIT')
+        # bpy.ops.object.mode_set(mode='EDIT')
         # Place frames and meshes at their origin
         temp_list = []
         temp_list.append(self.root_link) 
@@ -106,7 +106,7 @@ class URDFArmature:
                     # Call function to do parenting
                     urdf_joint = URDFJoint(self.urdf.joint_map[joint_name], self.urdf)
                     self.joints.append(urdf_joint)
-                    urdf_joint.build(ob, parent_link,child_link)
+                    urdf_joint.build(parent_link,child_link)
                 temp_list.pop(0)
             else:
                 temp_list.pop(0)

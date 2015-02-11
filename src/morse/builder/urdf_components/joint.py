@@ -76,7 +76,7 @@ class URDFJoint:
         if self.child == None:
             print('Invalid URDF file, couldn not find link ' + link.name + ' that is child of joint ' + self.name)
 
-    def build(self, armature, parent_link, child_link):
+    def build(self, parent_link, child_link):
 
         # Get according Blender objects
         self.parent_link = parent_link

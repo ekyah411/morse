@@ -64,15 +64,41 @@ class URDFLink:
 		else:
 			self.rot = Euler((0,0,0)).to_quaternion()
 
+
 	def build_visual(self):
 
-		geometry = self.urdf_link.visual.geometry
-		# Add mesh
-		mesh = self._add_mesh(geometry)	
-		if mesh:
 
-			self.mesh_visual = mesh
-			# Create mesh name
+		geometry = self.urdf_link.visual.geometry
+		print(geometry)
+		if isinstance(geometry, Box):
+
+			# Require size as Vector () geometry.size
+			bpy.ops.mesh.primitive_cube_add()
+			self.mesh_visual = bpy.context.selected_objects[0]
+			self.mesh_visual.dimensions = geometry.size
+			
+		elif isinstance(geometry, Cylinder):
+			# Requires geometry.radius and geometry.length
+			bpy.ops.mesh.primitive_cylinder_add(radius = geometry.radius, depth = geometry.length)
+			self.mesh_visual = bpy.context.selected_objects[0]
+
+		elif isinstance(geometry, Sphere):
+			# Require geometry.radius
+			bpy.ops.mesh.primitive_uv_sphere_add(size = geometry.radius)
+			self.mesh_visual = bpy.context.selected_objects[0]
+
+		elif isinstance(geometry, Mesh): 
+			print('Mesh type')
+		 	#Requires file path geometry.filename
+			filepath = geometry.filename
+			bpy.ops.import_mesh.stl(filepath= filepath)
+			self.mesh_visual = bpy.context.selected_objects[0]
+			self.mesh_visual.select = True
+			bpy.context.scene.objects.active = self.mesh_visual
+
+		
+
+		if self.mesh_visual:	
 			self.mesh_visual.name = self.frame.name + '_visual' 
 			# Make frame parent of mesh
 			self.mesh_visual.parent = self.frame
@@ -81,14 +107,36 @@ class URDFLink:
 				self.mesh_visual.location = self.urdf_link.visual.origin.xyz
 				self.mesh_visual.rotation_quaternion = Euler(self.urdf_link.visual.origin.rpy, 'XYZ').to_quaternion()
 	def build_collision(self):
-		# TODO: Load mesh from file
 		geometry = self.urdf_link.collision.geometry
+		print(geometry)
+		if isinstance(geometry, Box):
 
-		# Add mesh
-		mesh = self._add_mesh(geometry)	
-		if mesh:
-			self.mesh_collision = mesh
-			# Create mesh name
+			# Require size as Vector () geometry.size
+			bpy.ops.mesh.primitive_cube_add()
+			self.mesh_collision= bpy.context.selected_objects[0]
+			self.mesh_collision.dimensions = geometry.size
+			
+		elif isinstance(geometry, Cylinder):
+			# Requires geometry.radius and geometry.length
+			bpy.ops.mesh.primitive_cylinder_add(radius = geometry.radius, depth = geometry.length)
+			self.mesh_collision = bpy.context.selected_objects[0]
+
+		elif isinstance(geometry, Sphere):
+			# Require geometry.radius
+			bpy.ops.mesh.primitive_uv_sphere_add(size = geometry.radius)
+			self.mesh_collision = bpy.context.selected_objects[0]
+
+		elif isinstance(geometry, Mesh): 
+			print('Mesh type')
+		 	#Requires file path geometry.filename
+			filepath = geometry.filename
+			bpy.ops.import_mesh.stl(filepath= filepath)
+			self.mesh_collision = bpy.context.selected_objects[0]
+			self.mesh_collision.select = True
+			bpy.context.scene.objects.active = self.mesh_collision
+		
+
+		if self.mesh_collision:	
 			self.mesh_collision.name = self.frame.name + '_collision' 
 			# Make frame parent of mesh
 			self.mesh_collision.parent = self.frame
@@ -98,38 +146,70 @@ class URDFLink:
 				self.mesh_collision.rotation_quaternion = Euler(self.urdf_link.collision.origin.rpy, 'XYZ').to_quaternion()
 
 
-	def _add_mesh(self, geometry):
-		# If it is a box
-		# try: 
-		# 	isinstance(geometry, Mesh)
-		# except Exception, e:
-		# 	print('Problem checking mesh type..........................')
-		print(geometry)
-		if isinstance(geometry, Box):
+	# def build_visual(self):
 
-			# Require size as Vector () geometry.size
-			bpy.ops.mesh.primitive_cube_add()
-			mesh = bpy.context.selected_objects[0]
-			mesh.dimensions = geometry.size
+	# 	geometry = self.urdf_link.visual.geometry
+	# 	# Add mesh
+	# 	mesh = self._add_mesh(geometry)	
+	# 	if mesh:
+
+	# 		self.mesh_visual = mesh
+	# 		# Create mesh name
+	# 		self.mesh_visual.name = self.frame.name + '_visual' 
+	# 		# Make frame parent of mesh
+	# 		self.mesh_visual.parent = self.frame
+	# 		# Put mesh at the right location, but this will be overwritten by joint location
+	# 		if self.urdf_link.visual.origin:
+	# 			self.mesh_visual.location = self.urdf_link.visual.origin.xyz
+	# 			self.mesh_visual.rotation_quaternion = Euler(self.urdf_link.visual.origin.rpy, 'XYZ').to_quaternion()
+	# def build_collision(self):
+	# 	# TODO: Load mesh from file
+	# 	geometry = self.urdf_link.collision.geometry
+
+	# 	# Add mesh
+	# 	mesh = self._add_mesh(geometry)	
+	# 	if mesh:
+	# 		self.mesh_collision = mesh
+	# 		# Create mesh name
+	# 		self.mesh_collision.name = self.frame.name + '_collision' 
+	# 		# Make frame parent of mesh
+	# 		self.mesh_collision.parent = self.frame
+	# 		# Put mesh at the right location, but this will be overwritten by joint location
+	# 		if self.urdf_link.collision.origin:
+	# 			self.mesh_collision.location = self.urdf_link.collision.origin.xyz
+	# 			self.mesh_collision.rotation_quaternion = Euler(self.urdf_link.collision.origin.rpy, 'XYZ').to_quaternion()	
+	# def _add_mesh(self, geometry):
+	# 	# If it is a box
+	# 	# try: 
+	# 	# 	isinstance(geometry, Mesh)
+	# 	# except Exception, e:
+	# 	# 	print('Problem checking mesh type..........................')
+	# 	print(geometry)
+	# 	if isinstance(geometry, Box):
+
+	# 		# Require size as Vector () geometry.size
+	# 		bpy.ops.mesh.primitive_cube_add()
+	# 		mesh = bpy.context.selected_objects[0]
+	# 		mesh.dimensions = geometry.size
 			
-		elif isinstance(geometry, Cylinder):
-			# Requires geometry.radius and geometry.length
-			bpy.ops.mesh.primitive_cylinder_add(radius = geometry.radius, depth = geometry.length)
-			mesh = bpy.context.selected_objects[0]
+	# 	elif isinstance(geometry, Cylinder):
+	# 		# Requires geometry.radius and geometry.length
+	# 		bpy.ops.mesh.primitive_cylinder_add(radius = geometry.radius, depth = geometry.length)
+	# 		mesh = bpy.context.selected_objects[0]
 
-		elif isinstance(geometry, Sphere):
-			# Require geometry.radius
-			bpy.ops.mesh.primitive_uv_sphere_add(size = geometry.radius)
-			mesh = bpy.context.selected_objects[0]
+	# 	elif isinstance(geometry, Sphere):
+	# 		# Require geometry.radius
+	# 		bpy.ops.mesh.primitive_uv_sphere_add(size = geometry.radius)
+	# 		mesh = bpy.context.selected_objects[0]
 
-		#elif isinstance(geometry, Mesh): 
-		#	print('Mesh type')
-		 	# Requires file path geometry.filename
-	 	#	filepath = geometry.filename
-		# 	bpy.ops.import_mesh.stl(filepath= filepath)
-		# 	mesh = bpy.context.selected_objects[0]
+	# 	elif isinstance(geometry, Mesh): 
+	# 		print('Mesh type')
+	# 	 	Requires file path geometry.filename
+	#  		filepath = geometry.filename
+	# 		bpy.ops.import_mesh.stl(filepath= filepath)
+	# 		mesh = bpy.context.selected_objects[0]
 
-		else: 
-			return None
-		return mesh
+	# 	else: 
+	# 		return None
+	# 	return mesh
 
