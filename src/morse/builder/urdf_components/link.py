@@ -91,10 +91,15 @@ class URDFLink:
 			print('Mesh type')
 		 	#Requires file path geometry.filename
 			filepath = geometry.filename
+			
+
 			bpy.ops.import_mesh.stl(filepath= filepath)
 			self.mesh_visual = bpy.context.selected_objects[0]
 			self.mesh_visual.select = True
 			bpy.context.scene.objects.active = self.mesh_visual
+			if geometry.scale:
+				scale = Vector(geometry.scale)
+				bpy.ops.transform.resize(value = scale)
 
 		
 
@@ -134,6 +139,13 @@ class URDFLink:
 			self.mesh_collision = bpy.context.selected_objects[0]
 			self.mesh_collision.select = True
 			bpy.context.scene.objects.active = self.mesh_collision
+			if geometry.scale:
+				
+				scale = Vector(geometry.scale)
+				bpy.ops.transform.resize(value = scale)
+
+
+		
 		
 
 		if self.mesh_collision:	
@@ -144,6 +156,24 @@ class URDFLink:
 			if self.urdf_link.collision.origin:
 				self.mesh_collision.location = self.urdf_link.collision.origin.xyz
 				self.mesh_collision.rotation_quaternion = Euler(self.urdf_link.collision.origin.rpy, 'XYZ').to_quaternion()
+	def set_physics(self, physics_type = 'STATIC'):
+		print('Setting physics of ' + self.name)
+		if physics_type == 'STATIC':
+			self.frame.game.physics_type = 'STATIC'
+			if self.mesh_visual:
+				self.mesh_visual.game.physics_type = 'STATIC'
+			if self.mesh_collision:
+				self.mesh_collision.game.physics_type = 'STATIC'
+		else:
+			self.frame.game.physics_type = 'RIGID_BODY'
+			self.frame.game.use_collision_compound = True
+			if self.mesh_visual:
+				self.mesh_visual.game.use_ghost = True
+			if self.mesh_collision:
+				self.mesh_collision.game.physics_type = 'RIGID_BODY'
+				self.mesh_collision.game.use_collision_compound = True
+
+
 
 
 	# def build_visual(self):
@@ -212,4 +242,3 @@ class URDFLink:
 	# 	else: 
 	# 		return None
 	# 	return mesh
-

@@ -84,13 +84,22 @@ class URDFJoint:
         self.parent_frame = bpy.data.objects[parent_link.name]
         self.child_frame = bpy.data.objects[child_link.name]
 
+        print('Building ' + child_link.name + ' ........................')
         # Make parental relationship
         self.child_frame.parent = self.parent_frame
-
+        print('Make parental relationship')
         # Transform child using joint origin
         self.child_frame.location = self.xyz
         self.child_frame.rotation_quaternion = self.rot
-
+        print('set physics for link')
+        print(self.type)
+        if self.type == 'fixed':
+            print('fixed joint')
+            self.child_link.set_physics('STATIC')
+            
+        else:
+            self.child_link.set_physics('RIGID_BODY')
+            print('non fixed joint')
         
 
         
