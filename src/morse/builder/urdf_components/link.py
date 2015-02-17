@@ -93,9 +93,8 @@ class URDFLink:
 			print('Mesh type')
 		 	#Requires file path geometry.filename
 			rel_filepath = geometry.filename
-			filepath = self.get_path(rel_filepath)
-			
-
+			retriever = PathRetriever(rel_filepath)
+			filepath = retriever.path
 			bpy.ops.import_mesh.stl(filepath= filepath)
 			self.mesh_visual = bpy.context.selected_objects[0]
 			self.mesh_visual.select = True
@@ -136,16 +135,17 @@ class URDFLink:
 
 		elif isinstance(geometry, Mesh): 
 			print('Mesh type')
-		 	#Requires file path geometry.filename
-			
+		 	# Get absolute path			
 			rel_filepath = geometry.filename
-			filepath = self.get_path(rel_filepath)
+			retriever = PathRetriever(rel_filepath)
+			filepath = retriever.path
+
+			# Import mesh 
 			bpy.ops.import_mesh.stl(filepath= filepath)
 			self.mesh_collision = bpy.context.selected_objects[0]
 			self.mesh_collision.select = True
 			bpy.context.scene.objects.active = self.mesh_collision
 			if geometry.scale:
-				
 				scale = Vector(geometry.scale)
 				bpy.ops.transform.resize(value = scale)
 
@@ -157,6 +157,7 @@ class URDFLink:
 			if self.urdf_link.collision.origin:
 				self.mesh_collision.location = self.urdf_link.collision.origin.xyz
 				self.mesh_collision.rotation_quaternion = Euler(self.urdf_link.collision.origin.rpy, 'XYZ').to_quaternion()
+	
 	def set_physics(self, physics_type = 'STATIC'):
 		print('Setting physics of ' + self.name)
 		if physics_type == 'STATIC':
@@ -174,7 +175,7 @@ class URDFLink:
 				self.mesh_collision.game.physics_type = 'RIGID_BODY'
 				self.mesh_collision.game.use_collision_compound = True
 
-
+	# NOT BEING USED				
 	def get_path(self, rel_filepath):
 		if  rel_filepath.find('package://') != -1:
 			print('Retrieving path.....')
