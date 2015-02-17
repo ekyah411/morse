@@ -3,6 +3,8 @@ from mathutils import Vector, Matrix, Euler
 #from io_scene_urdf.urdf_parser.urdf import *
 
 from morse.builder.urdf_parser.urdf import *
+from morse.builder.urdf_components.pathretriever import *
+import rospkg
 class URDFLink:
 
 	def __init__(self, urdf_link):
@@ -90,7 +92,8 @@ class URDFLink:
 		elif isinstance(geometry, Mesh): 
 			print('Mesh type')
 		 	#Requires file path geometry.filename
-			filepath = geometry.filename
+			rel_filepath = geometry.filename
+			filepath = self.get_path(rel_filepath)
 			
 
 			bpy.ops.import_mesh.stl(filepath= filepath)
@@ -134,7 +137,9 @@ class URDFLink:
 		elif isinstance(geometry, Mesh): 
 			print('Mesh type')
 		 	#Requires file path geometry.filename
-			filepath = geometry.filename
+			
+			rel_filepath = geometry.filename
+			filepath = self.get_path(rel_filepath)
 			bpy.ops.import_mesh.stl(filepath= filepath)
 			self.mesh_collision = bpy.context.selected_objects[0]
 			self.mesh_collision.select = True
@@ -143,10 +148,6 @@ class URDFLink:
 				
 				scale = Vector(geometry.scale)
 				bpy.ops.transform.resize(value = scale)
-
-
-		
-		
 
 		if self.mesh_collision:	
 			self.mesh_collision.name = self.frame.name + '_collision' 
@@ -174,7 +175,25 @@ class URDFLink:
 				self.mesh_collision.game.use_collision_compound = True
 
 
+	def get_path(self, rel_filepath):
+		if  rel_filepath.find('package://') != -1:
+			print('Retrieving path.....')
+			# Extract package name
+			ind = rel_filepath.find('//')
+			temp = rel_filepath[ind+2:]
+			ind2 = temp.find('/')
+			package_name = temp[:ind2]
+			remain = temp[ind2:]
 
+			# Find package path
+
+			rospack = rospkg.RosPack()
+			package_path = rospack.get_path(package_name)
+			# Return absolute path
+			return package_path + remain
+		else:
+			print('The path ' + rel_filepath + ' can\'t be handled')
+			return rel_filepath
 
 	# def build_visual(self):
 

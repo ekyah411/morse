@@ -31,7 +31,7 @@ class URDFArmature:
             print('Establishing joints/links dependency...')
             self.root_link = URDFLink(self.urdf.link_map[self.urdf.get_root()])   
         except:
-            print('Multiple roots detected, robot will not be built, exiting...')
+            print('Multiple roots detected, model will not be built, exiting...')
             return 
         
         if self.type == 'ROBOT':
