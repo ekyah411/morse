@@ -11,6 +11,13 @@ class URDFLink:
 		self.urdf_link = urdf_link
 		self.name = urdf_link.name
 		self.inertial = urdf_link.inertial
+
+		# Copy visual or collision mesh if only one of them exists:
+		if urdf_link.visual and not urdf_link.collision:
+			urdf_link.collision = urdf_link.visual
+		elif urdf_link.collision and not urdf_link.visual:
+			urdf_link.visual = urdf_link.collision
+
 		self.visual = urdf_link.visual
 		self.collision = urdf_link.collision
 
@@ -31,12 +38,17 @@ class URDFLink:
 
 		self.mesh_visual = None
 		self.mesh_collision = None
+		self.mesh_visual_type = None
+		self.mesh_collision_type = None
+		print('got here.......................')
+		
+
+		print('and THEN got here.......................')
+
 		if self.visual:
 			self.build_visual()
 		if self.collision:
 			self.build_collision()
-
-
 		# # Add bones
 		# self.bone = armature.data.edit_bones.new(self.name + '_bone')
 
@@ -69,7 +81,6 @@ class URDFLink:
 
 	def build_visual(self):
 
-
 		geometry = self.urdf_link.visual.geometry
 		print(geometry)
 		if isinstance(geometry, Box):
@@ -78,23 +89,27 @@ class URDFLink:
 			bpy.ops.mesh.primitive_cube_add()
 			self.mesh_visual = bpy.context.selected_objects[0]
 			self.mesh_visual.dimensions = geometry.size
+			self.mesh_visual_type = 'BOX'
 			
 		elif isinstance(geometry, Cylinder):
 			# Requires geometry.radius and geometry.length
 			bpy.ops.mesh.primitive_cylinder_add(radius = geometry.radius, depth = geometry.length)
 			self.mesh_visual = bpy.context.selected_objects[0]
-
+			self.mesh_visual_type = 'CYLINDER'	
 		elif isinstance(geometry, Sphere):
 			# Require geometry.radius
 			bpy.ops.mesh.primitive_uv_sphere_add(size = geometry.radius)
 			self.mesh_visual = bpy.context.selected_objects[0]
-
+			self.mesh_visual_type = 'SPHERE'
 		elif isinstance(geometry, Mesh): 
 			print('Mesh type')
-		 	#Requires file path geometry.filename
+		 	# Get absolute path
 			rel_filepath = geometry.filename
 			retriever = PathRetriever(rel_filepath)
 			filepath = retriever.path
+			print(filepath + '.......................')
+
+			# Import mesh
 			bpy.ops.import_mesh.stl(filepath= filepath)
 			self.mesh_visual = bpy.context.selected_objects[0]
 			self.mesh_visual.select = True
@@ -102,8 +117,7 @@ class URDFLink:
 			if geometry.scale:
 				scale = Vector(geometry.scale)
 				bpy.ops.transform.resize(value = scale)
-
-		
+			self.mesh_visual_type = 'MESH'
 
 		if self.mesh_visual:	
 			self.mesh_visual.name = self.frame.name + '_visual' 
@@ -113,6 +127,7 @@ class URDFLink:
 			if self.urdf_link.visual.origin:
 				self.mesh_visual.location = self.urdf_link.visual.origin.xyz
 				self.mesh_visual.rotation_quaternion = Euler(self.urdf_link.visual.origin.rpy, 'XYZ').to_quaternion()
+		print('finish building visual mesh.......')
 	def build_collision(self):
 		geometry = self.urdf_link.collision.geometry
 		print(geometry)
@@ -122,17 +137,17 @@ class URDFLink:
 			bpy.ops.mesh.primitive_cube_add()
 			self.mesh_collision= bpy.context.selected_objects[0]
 			self.mesh_collision.dimensions = geometry.size
-			
+			self.mesh_collision_type = 'BOX'
 		elif isinstance(geometry, Cylinder):
 			# Requires geometry.radius and geometry.length
 			bpy.ops.mesh.primitive_cylinder_add(radius = geometry.radius, depth = geometry.length)
 			self.mesh_collision = bpy.context.selected_objects[0]
-
+			self.mesh_collision_type = 'CYLINDER'
 		elif isinstance(geometry, Sphere):
 			# Require geometry.radius
 			bpy.ops.mesh.primitive_uv_sphere_add(size = geometry.radius)
 			self.mesh_collision = bpy.context.selected_objects[0]
-
+			self.mesh_collision_type = 'SPHERE'
 		elif isinstance(geometry, Mesh): 
 			print('Mesh type')
 		 	# Get absolute path			
@@ -148,7 +163,8 @@ class URDFLink:
 			if geometry.scale:
 				scale = Vector(geometry.scale)
 				bpy.ops.transform.resize(value = scale)
-
+			self.mesh_collision_type = 'MESH'	
+		print('No problem here...............')
 		if self.mesh_collision:	
 			self.mesh_collision.name = self.frame.name + '_collision' 
 			# Make frame parent of mesh
@@ -162,18 +178,53 @@ class URDFLink:
 		print('Setting physics of ' + self.name)
 		if physics_type == 'STATIC':
 			self.frame.game.physics_type = 'STATIC'
+			self.frame.game.use_collision_compound = True
+			self.frame.game.radius = 0.01
 			if self.mesh_visual:
 				self.mesh_visual.game.physics_type = 'STATIC'
-			if self.mesh_collision:
-				self.mesh_collision.game.physics_type = 'STATIC'
-		else:
-			self.frame.game.physics_type = 'RIGID_BODY'
-			self.frame.game.use_collision_compound = True
-			if self.mesh_visual:
 				self.mesh_visual.game.use_ghost = True
 			if self.mesh_collision:
+				self.mesh_collision.game.physics_type = 'STATIC'
+
+
+		else:
+			# Set frame to be rigid body and compound
+			print('Set frame to be rigid body and compound')
+			self.frame.game.physics_type = 'RIGID_BODY'
+			self.frame.game.use_collision_compound = True
+			self.frame.game.radius = 0.01
+
+			print('Set visual mesh to be static and ghost')
+			# Set visual mesh to be static and ghost
+			if self.mesh_visual:
+				self.mesh_visual.game.physics_type = 'RIGID_BODY'
+				self.mesh_visual.game.use_ghost = True
+			print('Set collision mesh to be rigid body')
+			# Set collision mesh to be rigid body
+			if self.mesh_collision:
 				self.mesh_collision.game.physics_type = 'RIGID_BODY'
-				self.mesh_collision.game.use_collision_compound = True
+		if self.mesh_collision:
+			self.mesh_collision.game.use_collision_compound = True
+			self.mesh_collision.game.radius = 0.01
+			print('Set collision bounds for collision mesh')
+			# Set collision bounds for collision mesh
+			print('use collision bounds')
+			self.mesh_collision.game.use_collision_bounds = True
+			print('set collision margin')
+			# self.mesh_collision.game.collision_margin = 0.06
+			if self.mesh_collision_type == 'BOX':
+				print('if type box')
+				self.mesh_collision.game.collision_bounds_type = 'BOX'
+			elif self.mesh_collision_type == 'CYLINDER':
+				print('if type cylinder')
+				self.mesh_collision.game.collision_bounds_type = 'CYLINDER'
+			elif self.mesh_collision_type == 'SPHERE':
+				print('if type sphere')
+				self.mesh_collision.game.collision_bounds_type = 'SPHERE'
+			else: 
+				print('if type mesh')
+				self.mesh_collision.game.collision_bounds_type = 'CONVEX_HULL'
+
 
 	# NOT BEING USED				
 	def get_path(self, rel_filepath):
