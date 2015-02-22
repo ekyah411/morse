@@ -185,8 +185,6 @@ class URDFLink:
 				self.mesh_visual.game.use_ghost = True
 			if self.mesh_collision:
 				self.mesh_collision.game.physics_type = 'STATIC'
-
-
 		else:
 			# Set frame to be rigid body and compound
 			print('Set frame to be rigid body and compound')
@@ -224,6 +222,19 @@ class URDFLink:
 			else: 
 				print('if type mesh')
 				self.mesh_collision.game.collision_bounds_type = 'CONVEX_HULL'
+	
+	def set_motion(self, motion_type = 'fixed'):
+		if motion_type == 'fixed':
+			self.frame.game.lock_location_x = True
+			self.frame.game.lock_location_y = True
+			self.frame.game.lock_location_z = True
+			self.frame.game.lock_rotation_x = True
+			self.frame.game.lock_rotation_y = True
+			self.frame.game.lock_rotation_z = True
+
+			
+
+
 
 
 	# NOT BEING USED				

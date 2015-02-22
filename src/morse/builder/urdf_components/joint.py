@@ -24,6 +24,7 @@ class URDFJoint:
         if urdf_joint.origin:
             self.xyz = Vector(urdf_joint.origin.xyz)
             if urdf_joint.origin.rpy:
+                self.rpy = urdf_joint.origin.rpy
                 self.rot = Euler(urdf_joint.origin.rpy, 'XYZ').to_quaternion()
             else:
                 self.rot = Euler((0, 0, 0)).to_quaternion()
@@ -35,6 +36,7 @@ class URDFJoint:
         self.child_link = None
         self.parent_frame = None
         self.child_frame = None
+        self.constraint = None
         # self._add_parent(urdf_joint)
         # self._add_child(urdf_joint)
         # self.abs_xyz = None
@@ -44,6 +46,79 @@ class URDFJoint:
         
         # print('Joint ' + self.name + ' has PARENT = ' + self.parent.name + ' and CHILD = ' +self.child.name)
         
+    
+    def build(self, parent_link, child_link):
+
+        # Get according Blender objects
+        self.parent_link = parent_link
+        self.child_link = child_link
+        self.parent_frame = bpy.data.objects[parent_link.name]
+        self.child_frame = bpy.data.objects[child_link.name]
+
+        # print('Building ' + child_link.name + ' ........................')
+        # Make parental relationship
+        self.child_frame.parent = self.parent_frame
+        # Transform child using joint origin
+        self.child_frame.location = self.xyz
+        self.child_frame.rotation_quaternion = self.rot
+        self.child_link.set_physics('RIGID_BODY')
+        print(self.type)
+        if self.type == 'fixed':
+            print('fixed joint')
+            # Lock all translation and rotation
+            self.child_link.set_motion(self.type)
+            
+            
+        elif self.type == 'revolute': 
+
+            print('revolute joint')
+            # Select object and make active
+            bpy.context.scene.objects.active = self.child_frame
+            # Create rigid body joint constraint
+            bpy.ops.object.constraint_add(type='RIGID_BODY_JOINT')
+            self.constraint = self.child_frame.constraints.active
+            self.constraint.name = self.name
+            self.constraint.target = self.parent_frame
+            self.constraint.pivot_type = 'HINGE'
+            self.constraint.show_pivot = False
+            self.constraint.pivot_x = self.xyz[0]
+            self.constraint.pivot_y = self.xyz[1]
+            self.constraint.pivot_z = self.xyz[2]
+            self.constraint.axis_x = self.rpy[0]
+            self.constraint.axis_y = self.rpy[1]
+            self.constraint.axis_z = self.rpy[2]
+
+
+            
+
+        elif self.type == 'prismatic': 
+            print('prismatic joint')
+            bpy.context.scene.objects.active = self.child_frame
+            # Create rigid body joint constraint
+            bpy.ops.object.constraint_add(type='RIGID_BODY_JOINT')
+            self.child_frame.constraints.active.name = self.name
+                
+        
+
+        
+
+
+    def build_edit_bone(self, child_frame, parent_bone=None) :
+
+        self.child_bone = armature.data.edit_bones.new(self.name + '_bone')
+        if not parent_bone:
+            self.child_bone.head = (0,0,0)
+            self.child_bone.tail_local = self.child_frame.location
+            self.child_bone.parent = None
+            self.parent_bone = None
+        else:
+            self.parent_bone = parent_bone
+            self.child_bone.parent = self.parent_bone
+            self.child_bone.head = self.parent_bone.tail
+            self.child_bone.tail_local = self.child_frame.location
+            
+
+
     def _add_parent(self, urdf_joint):
         '''
         Find joint's parent link 
@@ -75,51 +150,6 @@ class URDFJoint:
             print('Invalid URDF file, joint ' + self.name + ' has no child')
         if self.child == None:
             print('Invalid URDF file, couldn not find link ' + link.name + ' that is child of joint ' + self.name)
-
-    def build(self, parent_link, child_link):
-
-        # Get according Blender objects
-        self.parent_link = parent_link
-        self.child_link = child_link
-        self.parent_frame = bpy.data.objects[parent_link.name]
-        self.child_frame = bpy.data.objects[child_link.name]
-
-        # print('Building ' + child_link.name + ' ........................')
-        # Make parental relationship
-        self.child_frame.parent = self.parent_frame
-        # Transform child using joint origin
-        self.child_frame.location = self.xyz
-        self.child_frame.rotation_quaternion = self.rot
-        print(self.type)
-        if self.type == 'fixed':
-            print('fixed joint')
-            self.child_link.set_physics('STATIC')
-            
-        else:
-            print('non fixed joint')
-            self.child_link.set_physics('RIGID_BODY')
-            
-        
-
-        
-
-
-    def build_edit_bone(self, child_frame, parent_bone=None) :
-
-        self.child_bone = armature.data.edit_bones.new(self.name + '_bone')
-        if not parent_bone:
-            self.child_bone.head = (0,0,0)
-            self.child_bone.tail_local = self.child_frame.location
-            self.child_bone.parent = None
-            self.parent_bone = None
-        else:
-            self.parent_bone = parent_bone
-            self.child_bone.parent = self.parent_bone
-            self.child_bone.head = self.parent_bone.tail
-            self.child_bone.tail_local = self.child_frame.location
-            
-
-
 
 
 
