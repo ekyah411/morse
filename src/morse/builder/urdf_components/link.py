@@ -222,7 +222,9 @@ class URDFLink:
 			else: 
 				print('if type mesh')
 				self.mesh_collision.game.collision_bounds_type = 'CONVEX_HULL'
-	
+			# Make collision mesh invisible
+			self.mesh_collision.hide_render = True
+			self.mesh_collision.hide = True
 	def set_motion(self, motion_type = 'fixed'):
 		if motion_type == 'fixed':
 			self.frame.game.lock_location_x = True

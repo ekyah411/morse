@@ -22,7 +22,8 @@ class URDFJoint:
 
         # If origin information is available
         if urdf_joint.origin:
-            self.xyz = Vector(urdf_joint.origin.xyz)
+            # self.xyz = Vector(urdf_joint.origin.xyz)
+            self.xyz = urdf_joint.origin.xyz
             if urdf_joint.origin.rpy:
                 self.rpy = urdf_joint.origin.rpy
                 self.rot = Euler(urdf_joint.origin.rpy, 'XYZ').to_quaternion()
@@ -31,6 +32,7 @@ class URDFJoint:
         else:
             self.xyz = Vector(0,0,0)
             self.rot = Euler((0, 0, 0)).to_quaternion()
+            self.rpy = Vector(0,0,0)
 
         self.parent_link = None
         self.child_link = None
@@ -58,23 +60,33 @@ class URDFJoint:
         # print('Building ' + child_link.name + ' ........................')
         # Make parental relationship
         self.child_frame.parent = self.parent_frame
+
         # Transform child using joint origin
         self.child_frame.location = self.xyz
-        self.child_frame.rotation_quaternion = self.rot
+        # self.child_frame.rotation_quaternion = self.rot
+        self.child_frame.rotation_euler = self.rpy
+        
+        # Set child link physics
         self.child_link.set_physics('RIGID_BODY')
         print(self.type)
+        
         if self.type == 'fixed':
             print('fixed joint')
-            # Lock all translation and rotation
-            self.child_link.set_motion(self.type)
-            
-            
-        elif self.type == 'revolute': 
+            # # Lock all translation and rotation
+            # self.child_link.set_motion(self.type)
 
+        elif self.type == 'revolute': 
             print('revolute joint')
+            ### Clear parenting relationship 
+            # Select child frame to be active
+            # bpy.context.scene.objects.active = self.child_frame
+            # # Clear parent but keep transform
+            # bpy.ops.object.parent_clear(type = 'CLEAR_KEEP_TRANSFORM')
+            
+            ### Create rigid body joint constraint
             # Select object and make active
             bpy.context.scene.objects.active = self.child_frame
-            # Create rigid body joint constraint
+            # Add constraints
             bpy.ops.object.constraint_add(type='RIGID_BODY_JOINT')
             self.constraint = self.child_frame.constraints.active
             self.constraint.name = self.name
@@ -84,24 +96,26 @@ class URDFJoint:
             self.constraint.pivot_x = self.xyz[0]
             self.constraint.pivot_y = self.xyz[1]
             self.constraint.pivot_z = self.xyz[2]
-            self.constraint.axis_x = self.rpy[0]
-            self.constraint.axis_y = self.rpy[1]
-            self.constraint.axis_z = self.rpy[2]
-
-
+            self.constraint.axis_x = self._to_deg(self.rpy[0])
+            self.constraint.axis_y = self._to_deg(self.rpy[1])
+            self.constraint.axis_z = self._to_deg(self.rpy[2])
             
 
         elif self.type == 'prismatic': 
             print('prismatic joint')
-            bpy.context.scene.objects.active = self.child_frame
-            # Create rigid body joint constraint
-            bpy.ops.object.constraint_add(type='RIGID_BODY_JOINT')
-            self.child_frame.constraints.active.name = self.name
+            # Clear parenting relationship 
+            # self.child_frame.parent_clear(type = 'CLEAR_KEEP_TRANSFORM')        
+            # bpy.context.scene.objects.active = self.child_frame
+            # # Create rigid body joint constraint
+            # bpy.ops.object.constraint_add(type='RIGID_BODY_JOINT')
+            # self.child_frame.constraints.active.name = self.name
                 
-        
+
 
         
-
+    def _to_deg(self, radian):
+        PI = 3.14159265
+        return radian*180/PI 
 
     def build_edit_bone(self, child_frame, parent_bone=None) :
 
