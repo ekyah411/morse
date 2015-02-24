@@ -39,6 +39,11 @@ class URDFJoint:
         self.parent_frame = None
         self.child_frame = None
         self.constraint = None
+        if urdf_joint.axis:
+            self.axis = urdf_joint.axis
+        else:
+            self.axis = [0.0, 0.0, 1.0]
+        self.limit = urdf_joint.limit
         # self._add_parent(urdf_joint)
         # self._add_child(urdf_joint)
         # self.abs_xyz = None
@@ -68,47 +73,127 @@ class URDFJoint:
         
         # Set child link physics
         self.child_link.set_physics('RIGID_BODY')
-        print(self.type)
+        # print(self.type)
         
         if self.type == 'fixed':
             print('fixed joint')
-            # # Lock all translation and rotation
-            # self.child_link.set_motion(self.type)
+            ### Lock all translation and rotation
+            # Select child frame to be active
+            self.child_frame.select = True
+            bpy.context.scene.objects.active = self.child_frame
+            print(self.child_frame.parent.name)
+            # Clear parent but keep transform
+            bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+            print('Cleared parent of ' + self.child_frame.name + '.....................')
+            if self.child_frame.parent:
+                print(self.child_frame.parent.name) 
+
+
+            # Select parent frame to be active
+            bpy.context.scene.objects.active = self.parent_frame
+            # Add constraints
+            bpy.ops.object.constraint_add(type='RIGID_BODY_JOINT')
+            self.constraint = self.parent_frame.constraints.active
+            self.constraint.name = self.name
+            self.constraint.target = self.child_frame
+            self.constraint.pivot_type = 'GENERIC_6_DOF'
+            self.constraint.show_pivot = False
+            self.constraint.use_limit_x = True
+            self.constraint.use_limit_y = True
+            self.constraint.use_limit_z = True
+            self.constraint.use_angular_limit_x = True
+            self.constraint.use_angular_limit_y = True
+            self.constraint.use_angular_limit_z = True
 
         elif self.type == 'revolute': 
             print('revolute joint')
             ### Clear parenting relationship 
             # Select child frame to be active
-            # bpy.context.scene.objects.active = self.child_frame
-            # # Clear parent but keep transform
-            # bpy.ops.object.parent_clear(type = 'CLEAR_KEEP_TRANSFORM')
+            self.child_frame.select = True
+            bpy.context.scene.objects.active = self.child_frame
+            print(self.child_frame.parent.name)
+            # Clear parent but keep transform
+            bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+            print('Cleared parent of ' + self.child_frame.name + '.....................')
+            if self.child_frame.parent:
+                print(self.child_frame.parent.name) 
             
             ### Create rigid body joint constraint
             # Select object and make active
-            bpy.context.scene.objects.active = self.child_frame
+            bpy.context.scene.objects.active = self.parent_frame
             # Add constraints
             bpy.ops.object.constraint_add(type='RIGID_BODY_JOINT')
-            self.constraint = self.child_frame.constraints.active
+            self.constraint = self.parent_frame.constraints.active
             self.constraint.name = self.name
-            self.constraint.target = self.parent_frame
+            self.constraint.target = self.child_frame
             self.constraint.pivot_type = 'HINGE'
             self.constraint.show_pivot = False
             self.constraint.pivot_x = self.xyz[0]
             self.constraint.pivot_y = self.xyz[1]
             self.constraint.pivot_z = self.xyz[2]
+
             self.constraint.axis_x = self._to_deg(self.rpy[0])
             self.constraint.axis_y = self._to_deg(self.rpy[1])
             self.constraint.axis_z = self._to_deg(self.rpy[2])
-            
+
+            if self.axis == [1.0,0.0,0.0]:                    
+                pass
+            elif self.axis == [0.0,1.0,0.0]:
+                self.constraint.axis_z = 90
+            elif self.axis == [0.0,0.0,1.0]:                
+                self.constraint.axis_y = -90
+                
+            self.constraint.use_angular_limit_x = True
+            self.constraint.limit_angle_min_x = self._to_deg(self.limit.lower)
+            self.constraint.limit_angle_max_x = self._to_deg(self.limit.upper)
 
         elif self.type == 'prismatic': 
             print('prismatic joint')
-            # Clear parenting relationship 
-            # self.child_frame.parent_clear(type = 'CLEAR_KEEP_TRANSFORM')        
-            # bpy.context.scene.objects.active = self.child_frame
-            # # Create rigid body joint constraint
-            # bpy.ops.object.constraint_add(type='RIGID_BODY_JOINT')
-            # self.child_frame.constraints.active.name = self.name
+            ### Clear parenting relationship 
+            # Select child frame to be active
+            self.child_frame.select = True
+            bpy.context.scene.objects.active = self.child_frame
+            print(self.child_frame.parent.name)
+            # Clear parent but keep transform
+            bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+            print('Cleared parent of ' + self.child_frame.name + '.....................')
+            if self.child_frame.parent:
+                print(self.child_frame.parent.name) 
+            
+            ### Create rigid body joint constraint
+            # Select object and make active
+            bpy.context.scene.objects.active = self.parent_frame
+            # Add constraints
+            bpy.ops.object.constraint_add(type='RIGID_BODY_JOINT')
+            self.constraint = self.parent_frame.constraints.active
+            self.constraint.name = self.name
+            self.constraint.target = self.child_frame
+            self.constraint.pivot_type = 'GENERIC_6_DOF'
+            self.constraint.show_pivot = False
+
+            self.constraint.use_limit_x = True
+            self.constraint.use_limit_y = True
+            self.constraint.use_limit_z = True
+            self.constraint.use_angular_limit_x = True
+            self.constraint.use_angular_limit_y = True
+            self.constraint.use_angular_limit_z = True
+            
+
+            if self.limit:                    
+                if self.axis == [1.0,0.0,0.0]:                    
+                    self.constraint.limit_min_x = self.limit.lower
+                    self.constraint.limit_max_x = self.limit.upper
+                elif self.axis == [0.0,1.0,0.0]:
+                    self.constraint.limit_min_y = self.limit.lower
+                    self.constraint.limit_max_y = self.limit.upper
+                elif self.axis == [0.0,0.0,1.0]:
+                    self.constraint.limit_min_z = self.limit.lower
+                    self.constraint.limit_max_z = self.limit.upper
+
+
+
+
+            # # Enable link collision
                 
 
 

@@ -28,32 +28,32 @@ class URDFArmature:
         # Put the joints and links together
         ### Start with the base link, if there is multiple roots, do nothing
         try: 
-            print('Establishing joints/links dependency...')
+            # print('Establishing joints/links dependency...')
             self.root_link = URDFLink(self.urdf.link_map[self.urdf.get_root()])   
         except:
             print('Multiple roots detected, model will not be built, exiting...')
             return 
         
         if self.type == 'ROBOT':
-            print('option = ROBOT')
+            # print('option = ROBOT')
             self.root_link.set_physics('RIGID_BODY')
         else:
-            print('option = ENVIRONMENT')
+            # print('option = ENVIRONMENT')
             self.root_link.set_physics('STATIC')
         
         temp_list = []
         temp_list.append(self.root_link) 
         self.links.append(self.root_link)
-        print('Locate frames at where they should be...............')
+        # print('Locate frames at where they should be...............')
         while len(temp_list)>0:
             parent_link = temp_list[0]
 
             # If there is only 1 link 
             if parent_link.name in self.urdf.child_map:
                 for (joint_name, child_link_name) in self.urdf.child_map[parent_link.name]:
-                    print('Initialize child link ' + child_link_name + ' ...................' )
+                    # print('Initialize child link ' + child_link_name + ' ...................' )
                     child_link = URDFLink(self.urdf.link_map[child_link_name])
-                    print('Finished initializing child link ' + child_link_name + ' ...................' )
+                    # print('Finished initializing child link ' + child_link_name + ' ...................' )
 
                     self.links.append(child_link)
 
@@ -61,10 +61,10 @@ class URDFArmature:
                         temp_list.append(child_link)
                     
                     # Call function to do parenting
-                    print('Initializing ' + joint_name + ' ...................' )                    
+                    # print('Initializing ' + joint_name + ' ...................' )                    
                     urdf_joint = URDFJoint(self.urdf.joint_map[joint_name], self.urdf)
                     self.joints.append(urdf_joint)
-                    print('Building ' + joint_name + ' ...................' )                    
+                    # print('Building ' + joint_name + ' ...................' )                    
                     urdf_joint.build(parent_link,child_link)
                 temp_list.pop(0)
             else:

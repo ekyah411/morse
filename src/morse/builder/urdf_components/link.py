@@ -40,10 +40,10 @@ class URDFLink:
 		self.mesh_collision = None
 		self.mesh_visual_type = None
 		self.mesh_collision_type = None
-		print('got here.......................')
+		# print('got here.......................')
 		
 
-		print('and THEN got here.......................')
+		# print('and THEN got here.......................')
 
 		if self.visual:
 			self.build_visual()
@@ -82,7 +82,7 @@ class URDFLink:
 	def build_visual(self):
 
 		geometry = self.urdf_link.visual.geometry
-		print(geometry)
+		# print(geometry)
 		if isinstance(geometry, Box):
 
 			# Require size as Vector () geometry.size
@@ -102,12 +102,12 @@ class URDFLink:
 			self.mesh_visual = bpy.context.selected_objects[0]
 			self.mesh_visual_type = 'SPHERE'
 		elif isinstance(geometry, Mesh): 
-			print('Mesh type')
+			# print('Mesh type')
 		 	# Get absolute path
 			rel_filepath = geometry.filename
 			retriever = PathRetriever(rel_filepath)
 			filepath = retriever.path
-			print(filepath + '.......................')
+			# print(filepath + '.......................')
 
 			# Import mesh
 			bpy.ops.import_mesh.stl(filepath= filepath)
@@ -127,10 +127,10 @@ class URDFLink:
 			if self.urdf_link.visual.origin:
 				self.mesh_visual.location = self.urdf_link.visual.origin.xyz
 				self.mesh_visual.rotation_quaternion = Euler(self.urdf_link.visual.origin.rpy, 'XYZ').to_quaternion()
-		print('finish building visual mesh.......')
+		# print('finish building visual mesh.......')
 	def build_collision(self):
 		geometry = self.urdf_link.collision.geometry
-		print(geometry)
+		# print(geometry)
 		if isinstance(geometry, Box):
 
 			# Require size as Vector () geometry.size
@@ -149,7 +149,7 @@ class URDFLink:
 			self.mesh_collision = bpy.context.selected_objects[0]
 			self.mesh_collision_type = 'SPHERE'
 		elif isinstance(geometry, Mesh): 
-			print('Mesh type')
+			# print('Mesh type')
 		 	# Get absolute path			
 			rel_filepath = geometry.filename
 			retriever = PathRetriever(rel_filepath)
@@ -164,7 +164,7 @@ class URDFLink:
 				scale = Vector(geometry.scale)
 				bpy.ops.transform.resize(value = scale)
 			self.mesh_collision_type = 'MESH'	
-		print('No problem here...............')
+		# print('No problem here...............')
 		if self.mesh_collision:	
 			self.mesh_collision.name = self.frame.name + '_collision' 
 			# Make frame parent of mesh
@@ -175,7 +175,7 @@ class URDFLink:
 				self.mesh_collision.rotation_quaternion = Euler(self.urdf_link.collision.origin.rpy, 'XYZ').to_quaternion()
 	
 	def set_physics(self, physics_type = 'STATIC'):
-		print('Setting physics of ' + self.name)
+		# print('Setting physics of ' + self.name)
 		if physics_type == 'STATIC':
 			self.frame.game.physics_type = 'STATIC'
 			self.frame.game.use_collision_compound = True
@@ -187,40 +187,40 @@ class URDFLink:
 				self.mesh_collision.game.physics_type = 'STATIC'
 		else:
 			# Set frame to be rigid body and compound
-			print('Set frame to be rigid body and compound')
+			# print('Set frame to be rigid body and compound')
 			self.frame.game.physics_type = 'RIGID_BODY'
 			self.frame.game.use_collision_compound = True
 			self.frame.game.radius = 0.01
 
-			print('Set visual mesh to be static and ghost')
+			# print('Set visual mesh to be static and ghost')
 			# Set visual mesh to be static and ghost
 			if self.mesh_visual:
 				self.mesh_visual.game.physics_type = 'RIGID_BODY'
 				self.mesh_visual.game.use_ghost = True
-			print('Set collision mesh to be rigid body')
+			# print('Set collision mesh to be rigid body')
 			# Set collision mesh to be rigid body
 			if self.mesh_collision:
 				self.mesh_collision.game.physics_type = 'RIGID_BODY'
 		if self.mesh_collision:
 			self.mesh_collision.game.use_collision_compound = True
 			self.mesh_collision.game.radius = 0.01
-			print('Set collision bounds for collision mesh')
+			# print('Set collision bounds for collision mesh')
 			# Set collision bounds for collision mesh
-			print('use collision bounds')
+			# print('use collision bounds')
 			self.mesh_collision.game.use_collision_bounds = True
-			print('set collision margin')
+			# print('set collision margin')
 			# self.mesh_collision.game.collision_margin = 0.06
 			if self.mesh_collision_type == 'BOX':
-				print('if type box')
+				# print('if type box')
 				self.mesh_collision.game.collision_bounds_type = 'BOX'
 			elif self.mesh_collision_type == 'CYLINDER':
-				print('if type cylinder')
+				# print('if type cylinder')
 				self.mesh_collision.game.collision_bounds_type = 'CYLINDER'
 			elif self.mesh_collision_type == 'SPHERE':
-				print('if type sphere')
+				# print('if type sphere')
 				self.mesh_collision.game.collision_bounds_type = 'SPHERE'
 			else: 
-				print('if type mesh')
+				# print('if type mesh')
 				self.mesh_collision.game.collision_bounds_type = 'CONVEX_HULL'
 			# Make collision mesh invisible
 			self.mesh_collision.hide_render = True
