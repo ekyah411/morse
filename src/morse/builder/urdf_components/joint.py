@@ -104,6 +104,26 @@ class URDFJoint:
             self.constraint.use_angular_limit_x = True
             self.constraint.use_angular_limit_y = True
             self.constraint.use_angular_limit_z = True
+            self.constraint.use_linked_collision = True
+
+
+            self.constraint.limit_min_x = -0.0001
+            self.constraint.limit_max_x = 0.0001
+
+            self.constraint.limit_min_y = -0.0001
+            self.constraint.limit_max_y = 0.0001
+
+            self.constraint.limit_min_z = -0.0001
+            self.constraint.limit_max_z = 0.0001
+
+            self.constraint.limit_angle_min_x = self._to_rad(-0.0001)
+            self.constraint.limit_angle_max_x = self._to_rad(0.0001)
+
+            self.constraint.limit_angle_min_y = self._to_rad(-0.0001)
+            self.constraint.limit_angle_max_y = self._to_rad(0.0001)
+
+            self.constraint.limit_angle_min_z = self._to_rad(-0.0001)
+            self.constraint.limit_angle_max_z = self._to_rad(0.0001)
 
         elif self.type == 'revolute': 
             print('revolute joint')
@@ -132,20 +152,19 @@ class URDFJoint:
             self.constraint.pivot_y = self.xyz[1]
             self.constraint.pivot_z = self.xyz[2]
 
-            self.constraint.axis_x = self._to_deg(self.rpy[0])
-            self.constraint.axis_y = self._to_deg(self.rpy[1])
-            self.constraint.axis_z = self._to_deg(self.rpy[2])
-
+            
             if self.axis == [1.0,0.0,0.0]:                    
-                pass
+                print('x axis')
             elif self.axis == [0.0,1.0,0.0]:
-                self.constraint.axis_z = 90
+                print('y axis')
+                self.constraint.axis_z = self._to_rad(90.0)
             elif self.axis == [0.0,0.0,1.0]:                
-                self.constraint.axis_y = -90
+                print('z axis')
+                self.constraint.axis_y = self._to_rad(-90.0)
                 
             self.constraint.use_angular_limit_x = True
-            self.constraint.limit_angle_min_x = self._to_deg(self.limit.lower)
-            self.constraint.limit_angle_max_x = self._to_deg(self.limit.upper)
+            self.constraint.limit_angle_min_x = self.limit.lower
+            self.constraint.limit_angle_max_x = self.limit.upper
 
         elif self.type == 'prismatic': 
             print('prismatic joint')
@@ -177,30 +196,57 @@ class URDFJoint:
             self.constraint.use_angular_limit_x = True
             self.constraint.use_angular_limit_y = True
             self.constraint.use_angular_limit_z = True
-            
 
             if self.limit:                    
                 if self.axis == [1.0,0.0,0.0]:                    
                     self.constraint.limit_min_x = self.limit.lower
                     self.constraint.limit_max_x = self.limit.upper
+
+
+                    self.constraint.limit_min_y = -0.0001
+                    self.constraint.limit_max_y = 0.0001
+
+                    self.constraint.limit_min_z = -0.0001
+                    self.constraint.limit_max_z = 0.0001
                 elif self.axis == [0.0,1.0,0.0]:
                     self.constraint.limit_min_y = self.limit.lower
                     self.constraint.limit_max_y = self.limit.upper
+
+                    self.constraint.limit_min_x = -0.0001
+                    self.constraint.limit_max_x = 0.0001
+
+                    self.constraint.limit_min_z = -0.0001
+                    self.constraint.limit_max_z = 0.0001
+
                 elif self.axis == [0.0,0.0,1.0]:
                     self.constraint.limit_min_z = self.limit.lower
                     self.constraint.limit_max_z = self.limit.upper
 
+                    self.constraint.limit_min_x = -0.0001
+                    self.constraint.limit_max_x = 0.0001
 
+                    self.constraint.limit_min_y = -0.0001
+                    self.constraint.limit_max_y = 0.0001
+
+            self.constraint.limit_angle_min_x = self._to_rad(-0.0001)
+            self.constraint.limit_angle_max_x = self._to_rad(0.0001)
+
+            self.constraint.limit_angle_min_y = self._to_rad(-0.0001)
+            self.constraint.limit_angle_max_y = self._to_rad(0.0001)
+
+            self.constraint.limit_angle_min_z = self._to_rad(-0.0001)
+            self.constraint.limit_angle_max_z = self._to_rad(0.0001)
 
 
             # # Enable link collision
+            self.constraint.use_linked_collision = True
                 
 
 
         
-    def _to_deg(self, radian):
+    def _to_rad(self, degree):
         PI = 3.14159265
-        return radian*180/PI 
+        return degree*PI/180.0
 
     def build_edit_bone(self, child_frame, parent_bone=None) :
 
